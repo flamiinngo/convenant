@@ -6,6 +6,7 @@ pub mod instructions;
 pub mod state;
 
 use instructions::*;
+use state::VotingRequirement;
 
 const COMP_DEF_OFFSET_TALLY_VOTE:         u32 = comp_def_offset("tally_vote");
 const COMP_DEF_OFFSET_REVEAL_TALLY:       u32 = comp_def_offset("reveal_tally");
@@ -17,8 +18,39 @@ declare_id!("6mk5vkuRHtsUH97bqGKKLoqfj113SQwAThVLw5GyQDYx");
 pub mod covenant {
     use super::*;
 
+    // ── Community ─────────────────────────────────────────────────────────
+
+    pub fn create_community(
+        ctx: Context<CreateCommunity>,
+        community_id: u64,
+        name: String,
+        description: String,
+        voting_requirement: VotingRequirement,
+    ) -> Result<()> {
+        instructions::create_community::create_community(
+            ctx, community_id, name, description, voting_requirement,
+        )
+    }
+
+    pub fn join_community(
+        ctx: Context<JoinCommunity>,
+        community_id: u64,
+    ) -> Result<()> {
+        instructions::join_community::join_community(ctx, community_id)
+    }
+
+    pub fn leave_community(
+        ctx: Context<LeaveCommunity>,
+        community_id: u64,
+    ) -> Result<()> {
+        instructions::leave_community::leave_community(ctx, community_id)
+    }
+
+    // ── Proposals ─────────────────────────────────────────────────────────
+
     pub fn create_proposal(
         ctx: Context<CreateProposal>,
+        community_id: u64,
         proposal_id: u64,
         title: String,
         description: String,
@@ -27,18 +59,19 @@ pub mod covenant {
         voting_end: i64,
     ) -> Result<()> {
         instructions::create_proposal::create_proposal(
-            ctx, proposal_id, title, description, option_a, option_b, voting_end,
+            ctx, community_id, proposal_id, title, description, option_a, option_b, voting_end,
         )
     }
 
     pub fn commit_to_proposal(
         ctx: Context<CommitToProposal>,
+        community_id: u64,
         proposal_id: u64,
         encrypted_commitment: Vec<u8>,
         commitment_nonce: u128,
     ) -> Result<()> {
         instructions::commit_to_proposal::commit_to_proposal(
-            ctx, proposal_id, encrypted_commitment, commitment_nonce,
+            ctx, community_id, proposal_id, encrypted_commitment, commitment_nonce,
         )
     }
 
@@ -63,6 +96,8 @@ pub mod covenant {
         instructions::finalize_proposal::finalize_proposal(ctx, proposal_id)
     }
 
+    // ── Arcium comp def init ──────────────────────────────────────────────
+
     pub fn init_tally_vote_comp_def(ctx: Context<InitTallyVoteCompDef>) -> Result<()> {
         init_comp_def(ctx.accounts, None, None)?;
         Ok(())
@@ -80,6 +115,8 @@ pub mod covenant {
         Ok(())
     }
 }
+
+// ── Arcium account structs ────────────────────────────────────────────────────
 
 #[init_computation_definition_accounts("tally_vote", payer)]
 #[derive(Accounts)]

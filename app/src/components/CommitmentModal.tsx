@@ -1,25 +1,30 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PublicKey } from '@solana/web3.js'
 import { useCommitment } from '../hooks/useCommitment'
 import '../styles/covenant.css'
 
 interface Props {
-  proposalId: number
-  optionA: string
-  optionB: string
-  onClose: () => void
+  proposalId:  number
+  communityId: number
+  optionA:     string
+  optionB:     string
+  tokenMint?:  PublicKey
+  onClose:     () => void
 }
 
-export default function CommitmentModal({ proposalId, optionA, optionB, onClose }: Props) {
+export default function CommitmentModal({
+  proposalId, communityId, optionA, optionB, tokenMint, onClose,
+}: Props) {
   const [selected, setSelected] = useState<0 | 1 | null>(null)
-  const { commit, status } = useCommitment(proposalId)
+  const { commit, status } = useCommitment(proposalId, communityId)
 
   const busy    = status === 'encrypting' || status === 'submitting'
   const success = status === 'done'
 
   async function handleSubmit() {
     if (selected === null) return
-    await commit(selected)
+    await commit(selected, tokenMint)
     setTimeout(onClose, 1800)
   }
 
@@ -37,10 +42,7 @@ export default function CommitmentModal({ proposalId, optionA, optionB, onClose 
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <div
-          className="modal-backdrop"
-          onClick={!busy ? onClose : undefined}
-        />
+        <div className="modal-backdrop" onClick={!busy ? onClose : undefined} />
 
         <motion.div
           className="modal-inner"
@@ -49,19 +51,17 @@ export default function CommitmentModal({ proposalId, optionA, optionB, onClose 
           exit={{ y: 20, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
         >
-          <button
-            className="modal-close"
-            onClick={onClose}
-            disabled={busy}
-            aria-label="Close"
-          >
-            ×
-          </button>
+          <button className="modal-close" onClick={onClose} disabled={busy}>×</button>
 
           <p className="modal-eyebrow">Private commitment</p>
           <h2 className="modal-title">Lock your vote</h2>
           <p className="modal-sub">
-            Encrypted on submission. No one — not even the network — sees your choice until tallying begins.
+            Encrypted on submission. No one sees your choice until tallying begins.
+            {tokenMint && (
+              <span style={{ display: 'block', marginTop: 6, color: 'var(--gold)', fontSize: 11 }}>
+                Token holding will be verified on-chain.
+              </span>
+            )}
           </p>
 
           <div className="modal-options">
@@ -84,15 +84,15 @@ export default function CommitmentModal({ proposalId, optionA, optionB, onClose 
             whileHover={selected !== null && !busy ? { opacity: 0.9 } : {}}
             whileTap={selected !== null && !busy ? { scale: 0.99 } : {}}
             className={`modal-submit ${
-              success ? 'modal-submit-success' :
+              success          ? 'modal-submit-success' :
               selected !== null && !busy ? 'modal-submit-ready' :
-              'modal-submit-idle'
+                                 'modal-submit-idle'
             }`}
           >
             {success
               ? 'COMMITTED'
               : busy
-                ? status === 'encrypting' ? 'ENCRYPTING...' : 'SUBMITTING...'
+                ? status === 'encrypting' ? 'ENCRYPTING…' : 'SUBMITTING…'
                 : 'COMMIT IN PRIVATE'}
           </motion.button>
         </motion.div>

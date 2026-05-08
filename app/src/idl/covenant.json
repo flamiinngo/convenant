@@ -45,6 +45,57 @@
           }
         },
         {
+          "name": "community",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  109,
+                  109,
+                  117,
+                  110,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
           "name": "user_commitment",
           "writable": true,
           "pda": {
@@ -87,6 +138,10 @@
       ],
       "args": [
         {
+          "name": "community_id",
+          "type": "u64"
+        },
+        {
           "name": "proposal_id",
           "type": "u64"
         },
@@ -97,6 +152,105 @@
         {
           "name": "commitment_nonce",
           "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "create_community",
+      "discriminator": [
+        203,
+        214,
+        176,
+        194,
+        13,
+        207,
+        22,
+        60
+      ],
+      "accounts": [
+        {
+          "name": "community",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  109,
+                  109,
+                  117,
+                  110,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_member",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              },
+              {
+                "kind": "account",
+                "path": "admin"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "community_id",
+          "type": "u64"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "voting_requirement",
+          "type": {
+            "defined": {
+              "name": "VotingRequirement"
+            }
+          }
         }
       ]
     },
@@ -139,6 +293,58 @@
           }
         },
         {
+          "name": "community",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  109,
+                  109,
+                  117,
+                  110,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              }
+            ]
+          }
+        },
+        {
           "name": "creator",
           "writable": true,
           "signer": true
@@ -149,6 +355,10 @@
         }
       ],
       "args": [
+        {
+          "name": "community_id",
+          "type": "u64"
+        },
         {
           "name": "proposal_id",
           "type": "u64"
@@ -428,6 +638,168 @@
       "args": []
     },
     {
+      "name": "join_community",
+      "discriminator": [
+        252,
+        106,
+        147,
+        30,
+        134,
+        74,
+        28,
+        232
+      ],
+      "accounts": [
+        {
+          "name": "community",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  109,
+                  109,
+                  117,
+                  110,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "community_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "leave_community",
+      "discriminator": [
+        218,
+        140,
+        41,
+        66,
+        8,
+        140,
+        33,
+        161
+      ],
+      "accounts": [
+        {
+          "name": "community",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  109,
+                  109,
+                  117,
+                  110,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "member_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  98,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "community_id"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "community_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "voting_closes",
       "discriminator": [
         118,
@@ -480,6 +852,19 @@
   ],
   "accounts": [
     {
+      "name": "CommunityState",
+      "discriminator": [
+        133,
+        66,
+        57,
+        235,
+        219,
+        148,
+        104,
+        230
+      ]
+    },
+    {
       "name": "MXEAccount",
       "discriminator": [
         103,
@@ -490,6 +875,19 @@
         159,
         17,
         117
+      ]
+    },
+    {
+      "name": "MemberState",
+      "discriminator": [
+        41,
+        28,
+        21,
+        90,
+        91,
+        49,
+        228,
+        104
       ]
     },
     {
@@ -569,9 +967,97 @@
       "code": 6006,
       "name": "InvalidProof",
       "msg": "invalid zk proof"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyMember",
+      "msg": "already a member of this community"
+    },
+    {
+      "code": 6008,
+      "name": "AdminCannotLeave",
+      "msg": "admin cannot leave the community"
+    },
+    {
+      "code": 6009,
+      "name": "WrongCommunity",
+      "msg": "proposal does not belong to this community"
+    },
+    {
+      "code": 6010,
+      "name": "TokenAccountRequired",
+      "msg": "token account is required for this community"
+    },
+    {
+      "code": 6011,
+      "name": "WrongTokenMint",
+      "msg": "token account has wrong mint"
+    },
+    {
+      "code": 6012,
+      "name": "WrongTokenOwner",
+      "msg": "token account has wrong owner"
+    },
+    {
+      "code": 6013,
+      "name": "InsufficientTokenBalance",
+      "msg": "insufficient token balance to vote"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTokenAccount",
+      "msg": "invalid token account data"
     }
   ],
   "types": [
+    {
+      "name": "CommunityState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "community_id",
+            "type": "u64"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "voting_requirement",
+            "type": {
+              "defined": {
+                "name": "VotingRequirement"
+              }
+            }
+          },
+          {
+            "name": "member_count",
+            "type": "u64"
+          },
+          {
+            "name": "proposal_count",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "MXEAccount",
       "docs": [
@@ -648,6 +1134,30 @@
       }
     },
     {
+      "name": "MemberState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "community_id",
+            "type": "u64"
+          },
+          {
+            "name": "member",
+            "type": "pubkey"
+          },
+          {
+            "name": "joined_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "MxeStatus",
       "docs": [
         "The status of an MXE."
@@ -694,6 +1204,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "community_id",
+            "type": "u64"
+          },
+          {
             "name": "proposal_id",
             "type": "u64"
           },
@@ -732,6 +1246,10 @@
                 "name": "ProposalStatus"
               }
             }
+          },
+          {
+            "name": "commitment_count",
+            "type": "u64"
           },
           {
             "name": "tally_nonce",
@@ -886,6 +1404,39 @@
                 64
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VotingRequirement",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "TokenGated",
+            "fields": [
+              {
+                "name": "mint",
+                "type": "pubkey"
+              },
+              {
+                "name": "min_amount",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "NftGated",
+            "fields": [
+              {
+                "name": "collection_mint",
+                "type": "pubkey"
+              }
+            ]
           }
         ]
       }

@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useProposal } from '../../hooks/useProposal'
+import { useCommunity } from '../../hooks/useCommunities'
+import { useCommitment } from '../../hooks/useCommitment'
 import CountdownTimer from '../../components/CountdownTimer'
 import CommitmentModal from '../../components/CommitmentModal'
 import ResultsBoard from '../../components/ResultsBoard'
@@ -15,28 +17,23 @@ export default function ProposalPage() {
   const { publicKey } = useWallet()
   const [modalOpen, setModalOpen] = useState(false)
 
-  if (isLoading) {
-    return (
-      <div className="page-loading">
-        <div className="spinner" />
-      </div>
-    )
-  }
+  const communityId = proposal ? Number(proposal.communityId) : -1
+  const { community, isMember } = useCommunity(communityId >= 0 ? communityId : -1)
 
-  if (!proposal) {
-    return (
-      <div className="page-loading">
-        <p className="not-found-text">Proposal not found.</p>
-      </div>
-    )
-  }
+  if (isLoading) return <div className="page-loading"><div className="spinner" /></div>
+  if (!proposal)  return <div className="page-loading"><p className="not-found-text">Proposal not found.</p></div>
 
-  const now        = Math.floor(Date.now() / 1000)
-  const votingEnd  = proposal.votingEnd.toNumber()
-  const statusKey  = Object.keys(proposal.status)[0]
-  const isVoting   = statusKey === 'Voting' && now < votingEnd
+  const now         = Math.floor(Date.now() / 1000)
+  const votingEnd   = proposal.votingEnd.toNumber()
+  const statusKey   = Object.keys(proposal.status)[0]
+  const isVoting    = statusKey === 'Voting' && now < votingEnd
   const isFinalized = statusKey === 'Finalized'
   const isTallying  = statusKey === 'TallyStarted'
+
+  const isAdmin   = community && publicKey
+    ? community.admin.toString() === publicKey.toBase58()
+    : false
+  const canVote   = publicKey && (isMember || isAdmin)
 
   const badgeClass =
     isVoting    ? 'badge badge-voting' :
@@ -50,9 +47,17 @@ export default function ProposalPage() {
     isFinalized ? 'Finalized'      :
                   'Created'
 
+  const tokenMint = community?.votingRequirement
+    ? ('tokenGated' in community.votingRequirement
+        ? community.votingRequirement.tokenGated.mint
+        : 'nftGated' in community.votingRequirement
+          ? community.votingRequirement.nftGated.collectionMint
+          : undefined)
+    : undefined
+
   return (
     <div className="proposal-page">
-      <div className="orb orb-gold" style={{ opacity: 0.35 }} />
+      <div className="orb orb-gold"    style={{ opacity: 0.35 }} />
       <div className="orb orb-emerald" style={{ opacity: 0.25 }} />
 
       <div className="proposal-container">
@@ -62,9 +67,18 @@ export default function ProposalPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          {/* ── Main column ─────────────────────────────────────────────── */}
+          {/* ── Main ──────────────────────────────────────────────────── */}
           <div className="proposal-main">
             <div className="proposal-head">
+              {community && (
+                <Link
+                  to={`/community/${communityId}`}
+                  className="results-back"
+                  style={{ marginBottom: 8 }}
+                >
+                  ← {community.name}
+                </Link>
+              )}
               <span className={badgeClass}>
                 <span className="badge-dot" />
                 {badgeLabel}
@@ -104,7 +118,7 @@ export default function ProposalPage() {
             )}
           </div>
 
-          {/* ── Sidebar ──────────────────────────────────────────────────── */}
+          {/* ── Sidebar ───────────────────────────────────────────────── */}
           <motion.div
             className="proposal-sidebar"
             initial={{ opacity: 0, x: 20 }}
@@ -125,13 +139,11 @@ export default function ProposalPage() {
               </div>
               <div className="meta-row">
                 <span className="meta-key">commitments</span>
-                <span className="meta-val mono">
-                  {proposal.commitmentCount?.toNumber?.() ?? '—'}
-                </span>
+                <span className="meta-val mono">{proposal.commitmentCount?.toNumber?.() ?? '—'}</span>
               </div>
               <div className="meta-row">
-                <span className="meta-key">network</span>
-                <span className="meta-val mono">devnet</span>
+                <span className="meta-key">community</span>
+                <span className="meta-val mono">#{communityId}</span>
               </div>
               <div className="meta-row">
                 <span className="meta-key">encryption</span>
@@ -140,20 +152,28 @@ export default function ProposalPage() {
             </div>
 
             {isVoting ? (
-              <button
-                className={`commit-btn ${!publicKey ? 'commit-btn-disabled' : ''}`}
-                onClick={() => publicKey && setModalOpen(true)}
-                disabled={!publicKey}
-              >
-                {publicKey ? 'COMMIT IN PRIVATE' : 'CONNECT WALLET'}
-              </button>
+              <>
+                <button
+                  className={`commit-btn ${!canVote ? 'commit-btn-disabled' : ''}`}
+                  onClick={() => canVote && setModalOpen(true)}
+                  disabled={!canVote}
+                >
+                  {!publicKey
+                    ? 'CONNECT WALLET'
+                    : !canVote
+                      ? 'JOIN COMMUNITY TO VOTE'
+                      : 'COMMIT IN PRIVATE'}
+                </button>
+                {publicKey && !canVote && (
+                  <p className="sidebar-hint">
+                    You must be a member of this community to vote.{' '}
+                    <Link to={`/community/${communityId}`} style={{ color: 'var(--gold)' }}>Join</Link>
+                  </p>
+                )}
+              </>
             ) : (isFinalized || isTallying) ? (
               <div className="sidebar-closed">Voting closed</div>
             ) : null}
-
-            {!publicKey && isVoting && (
-              <p className="sidebar-hint">Connect a wallet to cast your sealed vote.</p>
-            )}
           </motion.div>
         </motion.div>
       </div>
@@ -161,8 +181,10 @@ export default function ProposalPage() {
       {modalOpen && (
         <CommitmentModal
           proposalId={proposalId}
+          communityId={communityId}
           optionA={proposal.optionA}
           optionB={proposal.optionB}
+          tokenMint={tokenMint}
           onClose={() => setModalOpen(false)}
         />
       )}

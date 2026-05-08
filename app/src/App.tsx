@@ -16,6 +16,8 @@ import Docs from './pages/Docs'
 import ProposalPage from './pages/Proposal/[id]'
 import NewProposalPage from './pages/Proposal/new'
 import ResultsPage from './pages/Results/[id]'
+import CommunityPage from './pages/Community/[id]'
+import NewCommunityPage from './pages/Community/new'
 import { RPC_URL } from './utils/constants'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import './styles/globals.css'
@@ -41,11 +43,13 @@ export default function App() {
             <BrowserRouter>
               <Navbar />
               <Routes>
-                <Route path="/"              element={<Home />} />
-                <Route path="/docs"          element={<Docs />} />
-                <Route path="/proposal/new"  element={<NewProposalPage />} />
-                <Route path="/proposal/:id"  element={<ProposalPage />} />
-                <Route path="/results/:id"   element={<ResultsPage />} />
+                <Route path="/"                element={<Home />} />
+                <Route path="/docs"            element={<Docs />} />
+                <Route path="/community/new"   element={<NewCommunityPage />} />
+                <Route path="/community/:id"   element={<CommunityPage />} />
+                <Route path="/proposal/new"    element={<NewProposalPage />} />
+                <Route path="/proposal/:id"    element={<ProposalPage />} />
+                <Route path="/results/:id"     element={<ResultsPage />} />
               </Routes>
             </BrowserRouter>
           </QueryClientProvider>

@@ -30,6 +30,21 @@ export function useProposals() {
   })
 }
 
+export function useProposalsByCommunity(communityId: number) {
+  const program = useAnchorProgram()
+
+  return useQuery({
+    queryKey: ['proposals', 'community', communityId],
+    queryFn: async () => {
+      if (!program) return []
+      const all = await program.account.proposalState.all()
+      return all.filter((p: any) => p.account.communityId.toNumber() === communityId)
+    },
+    enabled: !!program && communityId >= 0,
+    refetchInterval: 10000,
+  })
+}
+
 async function findProposalPda(proposalId: number) {
   const { PublicKey } = await import('@solana/web3.js')
   const { PROGRAM_ID } = await import('../utils/constants')
