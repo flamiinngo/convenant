@@ -405,6 +405,51 @@
   background: var(--gold);
 }
 
+.nav-right {
+  display: flex; align-items: center; gap: 32px;
+}
+
+.nav-hamburger {
+  display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  gap: 5px; width: 32px; height: 32px;
+  background: none; border: none; cursor: pointer; padding: 4px;
+}
+
+.ham-line {
+  display: block; width: 20px; height: 1.5px;
+  background: var(--silver);
+  transition: transform 200ms ease, opacity 200ms ease;
+  transform-origin: center;
+}
+
+.ham-open-1 { transform: translateY(6.5px) rotate(45deg); }
+.ham-open-2 { opacity: 0; }
+.ham-open-3 { transform: translateY(-6.5px) rotate(-45deg); }
+
+.mobile-drawer {
+  position: fixed; top: 60px; left: 0; right: 0; z-index: 49;
+  display: none;
+  flex-direction: column; gap: 0;
+  background: rgba(3,8,17,0.97);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0 20px;
+}
+
+.mobile-nav-link {
+  display: block; padding: 14px 24px;
+  font-size: 15px; color: var(--silver);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color 160ms;
+}
+
+.mobile-nav-link:last-of-type { border-bottom: none; }
+.mobile-nav-link:hover, .mobile-nav-link.active { color: var(--text); }
+
+.mobile-drawer > div { padding: 12px 24px 0; }
+
 /* ── Docs page ───────────────────────────────────────────────────────────── */
 
 .docs-page {
@@ -1258,3 +1303,89 @@
 .proposal-form-submit { display: block; text-align: center; width: 100%; font-size: 13px; }
 .proposal-form-submit.opacity-60 { opacity: 0.6; }
 .proposal-form-submit.cursor-not-allowed { cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — tablet & mobile
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet ≤ 768px */
+@media (max-width: 768px) {
+
+  /* Navbar: show hamburger, hide desktop links */
+  .navbar { padding: 0 20px; }
+  .nav-right { display: none; }
+  .nav-hamburger { display: flex; }
+  .mobile-drawer { display: flex; }
+
+  /* Hero section */
+  .hero-layout { grid-template-columns: 1fr; gap: 40px; }
+  .proof-panel { display: none; }
+
+  /* Containers */
+  .proposal-container,
+  .results-container,
+  .new-proposal-container,
+  .docs-container { padding: 40px 20px 80px; }
+
+  /* Stats strip: allow horizontal scroll */
+  .stats-strip { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .stat-item   { min-width: 120px; padding: 16px 20px; }
+
+  /* Proposal layout: stack */
+  .proposal-layout { grid-template-columns: 1fr; gap: 32px; }
+  .proposal-sidebar { position: static; }
+
+  /* Docs */
+  .steps-grid  { grid-template-columns: 1fr; }
+  .mpc-section { grid-template-columns: 1fr; gap: 32px; }
+  .props-grid  { grid-template-columns: 1fr; }
+
+  /* ZK stats: 2 col */
+  .zk-stats { grid-template-columns: 1fr 1fr; }
+  .zk-stat:nth-child(2) { border-right: none; }
+  .zk-stat:nth-child(3) {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    border-right: none;
+  }
+
+  /* Modal */
+  .modal-inner { padding: 28px 20px; margin: 16px; }
+}
+
+/* Mobile ≤ 480px */
+@media (max-width: 480px) {
+
+  /* Hero text */
+  .hero-body { font-size: 15px; }
+  .hero-actions { gap: 16px; }
+
+  /* Home page inner padding */
+  .relative.z-10.w-full { padding-left: 20px !important; padding-right: 20px !important; }
+
+  /* Proposals grid: single column */
+  .proposals-grid { grid-template-columns: 1fr; }
+
+  /* Countdown: tighter */
+  .countdown-num  { font-size: 22px; }
+  .countdown-wrap { gap: 6px; }
+
+  /* Sidebar widgets */
+  .sidebar-widget { padding: 16px; }
+
+  /* Results container */
+  .results-container { padding: 32px 16px 64px; }
+
+  /* ZK stats: single column */
+  .zk-stats { grid-template-columns: 1fr; }
+  .zk-stat  { border-right: none !important; border-top: 1px solid var(--border); }
+  .zk-stat:first-child { border-top: none; }
+
+  /* Form */
+  .form-row { grid-template-columns: 1fr; }
+  .new-proposal-container { padding: 32px 16px 64px; }
+
+  /* Docs */
+  .docs-container { padding: 32px 16px 64px; }
+  .step-card { padding: 24px 20px; }
+}
