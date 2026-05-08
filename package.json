@@ -1,0 +1,26 @@
+{
+  "name": "covenant",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build:circuits": "cd encrypted-ixs && arcium build && cp -r target/*.arcis ../build/",
+    "build:program": "anchor build && node scripts/copy-idl.mjs",
+    "build": "npm run build:circuits && npm run build:program",
+    "test:e2e": "npx ts-node scripts/test-e2e.ts",
+    "test:verify": "node scripts/verify-onchain.js",
+    "deploy": "anchor deploy --provider.cluster devnet",
+    "dev": "cd app && vite",
+    "build:app": "cd app && vite build",
+    "deploy:circuits": "RPC_URL=https://api.devnet.solana.com node scripts/init-comp-defs.mjs && RPC_URL=https://api.devnet.solana.com node scripts/upload-circuits.mjs && node scripts/finalize-circuits.mjs"
+  },
+  "dependencies": {
+    "@arcium-hq/client": "0.9.6",
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.91.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}
