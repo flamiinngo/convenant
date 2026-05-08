@@ -644,7 +644,7 @@
 
 .countdown-num {
   font-size: 28px; font-weight: 500; line-height: 1;
-  display: block; tabular-nums: 1;
+  display: block; font-variant-numeric: tabular-nums;
 }
 
 .countdown-unit {
@@ -672,17 +672,19 @@
 }
 
 .radio-option {
+  display: flex; align-items: center; justify-content: space-between;
   padding: 14px 16px;
   border-radius: 8px;
   border: 1px solid var(--border-raised);
   cursor: pointer;
   transition: border-color 200ms ease, background 200ms ease;
+  background: none; width: 100%; text-align: left;
 }
 
 .radio-option:hover { border-color: rgba(201,168,76,0.2); }
 
 .radio-option.selected {
-  border-color: var(--gold-border);
+  border-color: rgba(201,168,76,0.35);
   background: rgba(201,168,76,0.06);
 }
 
