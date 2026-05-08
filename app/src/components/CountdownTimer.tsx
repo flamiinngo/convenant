@@ -7,17 +7,19 @@ interface Props {
 
 function getRemaining(endsAt: number) {
   const diff = Math.max(0, endsAt - Math.floor(Date.now() / 1000))
-  const d = Math.floor(diff / 86400)
-  const h = Math.floor((diff % 86400) / 3600)
-  const m = Math.floor((diff % 3600) / 60)
-  const s = diff % 60
-  return { d, h, m, s, total: diff }
+  return {
+    d: Math.floor(diff / 86400),
+    h: Math.floor((diff % 86400) / 3600),
+    m: Math.floor((diff % 3600) / 60),
+    s: diff % 60,
+    total: diff,
+  }
 }
 
-function colorFor(total: number) {
+function urgencyColor(total: number) {
   if (total < 300)  return '#E17055'
   if (total < 3600) return '#FF9800'
-  return '#F5F5F5'
+  return 'var(--text)'
 }
 
 function Digit({ value, label }: { value: number; label: string }) {
@@ -26,20 +28,20 @@ function Digit({ value, label }: { value: number; label: string }) {
   prev.current = value
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="countdown-digit">
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
-          initial={changed ? { y: 8, opacity: 0, scale: 1.05 } : false}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
+          initial={changed ? { y: 8, opacity: 0 } : false}
+          animate={{ y: 0, opacity: 1 }}
           exit={{ y: -8, opacity: 0 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="text-4xl font-bold tabular-nums"
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className="countdown-num"
         >
           {String(value).padStart(2, '0')}
         </motion.span>
       </AnimatePresence>
-      <span className="text-xs text-silver mt-1">{label}</span>
+      <span className="countdown-unit">{label}</span>
     </div>
   )
 }
@@ -52,16 +54,16 @@ export default function CountdownTimer({ endsAt }: Props) {
     return () => clearInterval(id)
   }, [endsAt])
 
-  const color = colorFor(time.total)
+  const color = urgencyColor(time.total)
 
   return (
-    <div style={{ color }} className="flex items-center gap-4">
+    <div className="countdown-wrap" style={{ color }}>
       <Digit value={time.d} label="days" />
-      <span className="text-2xl mb-4 text-silver">:</span>
-      <Digit value={time.h} label="hours" />
-      <span className="text-2xl mb-4 text-silver">:</span>
+      <span className="countdown-sep">:</span>
+      <Digit value={time.h} label="hrs" />
+      <span className="countdown-sep">:</span>
       <Digit value={time.m} label="min" />
-      <span className="text-2xl mb-4 text-silver">:</span>
+      <span className="countdown-sep">:</span>
       <Digit value={time.s} label="sec" />
     </div>
   )

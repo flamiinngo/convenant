@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, CheckCircle, X } from 'lucide-react'
 import { useCommitment } from '../hooks/useCommitment'
 import '../styles/covenant.css'
 
@@ -32,49 +31,49 @@ export default function CommitmentModal({ proposalId, optionA, optionB, onClose 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center"
+        className="modal-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
       >
         <div
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          className="modal-backdrop"
           onClick={!busy ? onClose : undefined}
         />
 
         <motion.div
-          className="commitment-modal relative z-10 w-full max-w-xl rounded-xl bg-navy border border-slate p-8"
+          className="modal-inner"
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 20, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
         >
           <button
+            className="modal-close"
             onClick={onClose}
-            className="absolute top-4 right-4 text-silver hover:text-white transition-colors"
             disabled={busy}
+            aria-label="Close"
           >
-            <X size={18} />
+            ×
           </button>
 
-          <h2 className="text-2xl font-bold tracking-widest mb-1">LOCK YOUR COMMITMENT</h2>
-          <p className="text-silver text-sm mb-8">
-            Your choice stays private until voting ends.
+          <p className="modal-eyebrow">Private commitment</p>
+          <h2 className="modal-title">Lock your vote</h2>
+          <p className="modal-sub">
+            Encrypted on submission. No one — not even the network — sees your choice until tallying begins.
           </p>
 
-          <div className="space-y-3 mb-8">
+          <div className="modal-options">
             {options.map(opt => (
               <button
                 key={opt.id}
                 onClick={() => !busy && setSelected(opt.id)}
-                className={`radio-option w-full text-left px-5 py-4 rounded-lg border transition-all ${
-                  selected === opt.id
-                    ? 'selected bg-gold/10'
-                    : 'border-slate hover:border-silver'
-                }`}
+                className={`radio-option ${selected === opt.id ? 'selected' : ''}`}
+                disabled={busy}
               >
-                <span className="font-medium text-white">{opt.label}</span>
+                <span className="radio-label">{opt.label}</span>
+                {selected === opt.id && <span className="radio-check" />}
               </button>
             ))}
           </div>
@@ -82,29 +81,19 @@ export default function CommitmentModal({ proposalId, optionA, optionB, onClose 
           <motion.button
             onClick={handleSubmit}
             disabled={selected === null || busy || success}
-            whileHover={selected !== null && !busy ? { scale: 1.01 } : {}}
+            whileHover={selected !== null && !busy ? { opacity: 0.9 } : {}}
             whileTap={selected !== null && !busy ? { scale: 0.99 } : {}}
-            className={`w-full py-4 rounded-lg font-bold text-sm tracking-widest flex items-center justify-center gap-2 transition-all ${
-              success
-                ? 'bg-emerald text-white'
-                : selected !== null
-                  ? 'bg-gold text-navy cursor-pointer'
-                  : 'bg-slate text-silver cursor-not-allowed'
+            className={`modal-submit ${
+              success ? 'modal-submit-success' :
+              selected !== null && !busy ? 'modal-submit-ready' :
+              'modal-submit-idle'
             }`}
           >
-            {success ? (
-              <>
-                <CheckCircle size={16} />
-                COMMITTED
-              </>
-            ) : busy ? (
-              <>
-                <Lock size={16} className="lock-spinning" />
-                {status === 'encrypting' ? 'ENCRYPTING...' : 'SUBMITTING...'}
-              </>
-            ) : (
-              'COMMIT'
-            )}
+            {success
+              ? 'COMMITTED'
+              : busy
+                ? status === 'encrypting' ? 'ENCRYPTING...' : 'SUBMITTING...'
+                : 'COMMIT IN PRIVATE'}
           </motion.button>
         </motion.div>
       </motion.div>

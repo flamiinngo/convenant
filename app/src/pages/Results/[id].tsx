@@ -1,6 +1,5 @@
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ExternalLink } from 'lucide-react'
 import { useProposal } from '../../hooks/useProposal'
 import ResultsBoard from '../../components/ResultsBoard'
 import ExecutionTimeline from '../../components/ExecutionTimeline'
@@ -12,96 +11,99 @@ export default function ResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+      <div className="page-loading">
+        <div className="spinner" />
       </div>
     )
   }
 
   if (!proposal) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-silver">
-        Proposal not found.
+      <div className="page-loading">
+        <p className="not-found-text">Proposal not found.</p>
       </div>
     )
   }
 
-  const proof     = proposal.zkProof.length > 0 ? parseProof(proposal.zkProof) : null
   const proofHex  = Buffer.from(proposal.zkProof).toString('hex')
+  const proof     = proposal.zkProof.length > 0 ? parseProof(proposal.zkProof) : null
   const isFinalized = Object.keys(proposal.status)[0] === 'Finalized'
+  const explorerTx = proofHex.length >= 64
+    ? `https://explorer.solana.com/tx/${proofHex.slice(0, 64)}?cluster=devnet`
+    : null
+
+  const fade = (delay = 0) => ({
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4, delay },
+  })
 
   return (
-    <div className="max-w-3xl mx-auto px-8 py-16 space-y-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-      >
-        <h2 className="font-serif text-2xl text-silver mb-6">{proposal.title}</h2>
-        <ResultsBoard
-          optionA={proposal.optionA}
-          optionB={proposal.optionB}
-          countA={proposal.resultOptionA.toNumber()}
-          countB={proposal.resultOptionB.toNumber()}
-          zkProof={proposal.zkProof}
-        />
-      </motion.div>
+    <div className="results-page">
+      <div className="orb orb-emerald" style={{ opacity: 0.3 }} />
+      <div className="orb orb-gold"    style={{ opacity: 0.2, top: 'auto', bottom: '-10%', right: 'auto', left: '-8%' }} />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.15 }}
-      >
-        <h3 className="text-sm font-semibold tracking-widest text-silver uppercase mb-6">
-          Execution timeline
-        </h3>
-        <ExecutionTimeline
-          currentPhase={isFinalized ? 'Executing' : 'Commitments tallied'}
-          progress={isFinalized ? 100 : 0}
-        />
-      </motion.div>
-
-      {proof && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.25 }}
-          className="space-y-4"
-        >
-          <h3 className="text-sm font-semibold tracking-widest text-silver uppercase">
-            ZK proof
-          </h3>
-          <div className="rounded-lg border border-emerald/30 bg-emerald/5 p-5 space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-silver mb-1">Option A votes</p>
-                <p className="text-white font-bold">{proof.countA.toString()}</p>
-              </div>
-              <div>
-                <p className="text-silver mb-1">Option B votes</p>
-                <p className="text-white font-bold">{proof.countB.toString()}</p>
-              </div>
-              <div>
-                <p className="text-silver mb-1">Total counted</p>
-                <p className="text-white font-bold">{proof.total.toString()}</p>
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-silver mb-1 font-mono">proof hash</p>
-              <p className="text-xs font-mono text-emerald break-all">{proofHex}</p>
-            </div>
-            <a
-              href={`https://explorer.solana.com/tx/${proofHex.slice(0, 64)}?cluster=devnet`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-sky hover:underline"
-            >
-              View on Solana Explorer
-              <ExternalLink size={11} />
-            </a>
-          </div>
+      <div className="results-container">
+        <motion.div {...fade(0)} className="results-head">
+          <Link to={`/proposal/${id}`} className="results-back">← Back to proposal</Link>
+          <p className="section-label" style={{ marginBottom: 12 }}>Final results</p>
+          <h1 className="results-title">{proposal.title}</h1>
         </motion.div>
-      )}
+
+        <motion.div {...fade(0.08)}>
+          <ResultsBoard
+            optionA={proposal.optionA}
+            optionB={proposal.optionB}
+            countA={proposal.resultOptionA.toNumber()}
+            countB={proposal.resultOptionB.toNumber()}
+            zkProof={proposal.zkProof}
+          />
+        </motion.div>
+
+        <motion.div {...fade(0.16)} className="results-section">
+          <p className="section-label" style={{ marginBottom: 24 }}>Execution pipeline</p>
+          <ExecutionTimeline
+            currentPhase={isFinalized ? 'Executing' : 'Commitments tallied'}
+            progress={isFinalized ? 100 : 0}
+          />
+        </motion.div>
+
+        {proof && (
+          <motion.div {...fade(0.24)} className="results-section">
+            <p className="section-label" style={{ marginBottom: 24 }}>Zero-knowledge proof</p>
+            <div className="zk-panel">
+              <div className="zk-stats">
+                <div className="zk-stat">
+                  <span className="zk-stat-label">Option A votes</span>
+                  <span className="zk-stat-val">{proof.countA.toString()}</span>
+                </div>
+                <div className="zk-stat">
+                  <span className="zk-stat-label">Option B votes</span>
+                  <span className="zk-stat-val">{proof.countB.toString()}</span>
+                </div>
+                <div className="zk-stat">
+                  <span className="zk-stat-label">Total counted</span>
+                  <span className="zk-stat-val">{proof.total.toString()}</span>
+                </div>
+              </div>
+              <div className="zk-hash-row">
+                <span className="zk-hash-label">proof hash</span>
+                <code className="zk-hash-val">{proofHex}</code>
+              </div>
+              {explorerTx && (
+                <a
+                  href={explorerTx}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="zk-explorer-link"
+                >
+                  View on Solana Explorer
+                </a>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }

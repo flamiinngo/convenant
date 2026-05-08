@@ -14,6 +14,7 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Docs from './pages/Docs'
 import ProposalPage from './pages/Proposal/[id]'
+import NewProposalPage from './pages/Proposal/new'
 import ResultsPage from './pages/Results/[id]'
 import { RPC_URL } from './utils/constants'
 import '@solana/wallet-adapter-react-ui/styles.css'
@@ -42,6 +43,7 @@ export default function App() {
               <Routes>
                 <Route path="/"              element={<Home />} />
                 <Route path="/docs"          element={<Docs />} />
+                <Route path="/proposal/new"  element={<NewProposalPage />} />
                 <Route path="/proposal/:id"  element={<ProposalPage />} />
                 <Route path="/results/:id"   element={<ResultsPage />} />
               </Routes>
